@@ -27,7 +27,7 @@ class JGP_HudMessageHandler : StaticEventHandler
 		if (e.name == "testhudmsg")
 		{
 			//console.printf("testing ZSHudMessage");
-			let hmsg = JGP_HudMessage.Create("A quick brown fox jumps over the lazy dog", fontname: 'BigUpper', fontcolor: Font.CR_Green, alignment: JGP_HudMessage.ALIGN_CENTER, fadeinTime: 0, typeTime: 2, holdtime: 35, fadeOutTime: 50, scale: (0.5, 0.5), viewer: players[e.Player]);
+			let hmsg = JGP_HudMessage.Create("$GOTSHOTGUN", id: 1, fontname: 'BigUpper', fontcolor: Font.CR_Green, alignment: JGP_HudMessage.ALIGN_CENTER, fadeinTime: 0, typeTime: 2, holdtime: 35, fadeOutTime: 50, scale: (0.5, 0.5), viewer: players[e.Player]);
 			if (hmsg)
 			{
 				hudmessages.Push(hmsg);
@@ -128,13 +128,16 @@ class JGP_HudMessage play
 				}
 			}
 			// text:
-			hmsg.text = StringTable.Localize(text);
-			hmsg.fulltext = hmsg.text;
-			hmsg.characters = hmsg.text.Length();
+			hmsg.fulltext = StringTable.Localize(text);
+			hmsg.characters = hmsg.fulltext.Length();
 			hmsg.msgFont = Font.FindFont(fontname);
 			hmsg.fontColor = fontColor;
+			if (typeTime == 0)
+			{
+				hmsg.text = hmsg.fulltext;
+			}
 			// pos:
-			double textwidth = hmsg.msgFont.StringWidth(hmsg.text) * scale.x;
+			double textwidth = hmsg.msgFont.StringWidth(hmsg.fulltext) * scale.x;
 			switch (alignment)
 			{
 			case ALIGN_CENTER:
@@ -213,20 +216,18 @@ class JGP_HudMessage play
 		}
 
 		// type the next character:
-		if (typetime > 0 && curChar < characters)
+		if (totalTypeTime > 0 && curChar < characters)
 		{
-			if (totalTypeTime > 0)
+			if (totalTypeTime % typeTime == 0)
 			{
-				if (totalTypeTime % typeTime == 0)
-				{
-					//int codepoint, nextpos;
-					//[codepoint, nextpos] = text.GetNextCodePoint(curChar);
-					//curChar = nextpos;
-					curChar++;
-					text = fulltext.Left(curChar);
-				}
-				totalTypeTime--;
+				int codepoint, nextpos;
+				[codepoint, nextpos] = fulltext.GetNextCodePoint(curChar);
+				curChar = nextpos;
+				//curChar++;
+				//text = fulltext.Left(curChar);
+				text.AppendCharacter(codepoint);
 			}
+			totalTypeTime--;
 		}
 	}
 }
