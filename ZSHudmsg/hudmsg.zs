@@ -24,7 +24,7 @@ class JGP_HudMessageHandler : StaticEventHandler
 
 	override void NetworkProcess(consoleEvent e)
 	{
-		if (e.name == "hudmsg")
+		if (e.name == "testhudmsg")
 		{
 			//console.printf("testing ZSHudMessage");
 			let hmsg = JGP_HudMessage.Create("A quick brown fox jumps over the lazy dog", fontname: 'BigUpper', fontcolor: Font.CR_Green, alignment: JGP_HudMessage.ALIGN_CENTER, fadeinTime: 0, typeTime: 2, holdtime: 35, fadeOutTime: 50, scale: (0.5, 0.5), viewer: players[e.Player]);
