@@ -27,7 +27,7 @@ class JGP_HudMessageHandler : StaticEventHandler
 		if (e.name == "hudmsg")
 		{
 			//console.printf("testing ZSHudMessage");
-			let hmsg = JGP_HudMessage.Create("$PICKUP_PISTOL_DROPPED", id: 1, fontname: 'BigUpper', fontcolor: Font.CR_Green, alignment: JGP_HudMessage.ALIGN_CENTER, fadeinTime: 0, typeTime: 2, holdtime: 35, fadeOutTime: 50, scale: (0.5, 0.5), viewer: players[e.Player]);
+			let hmsg = JGP_HudMessage.Create("A quick brown fox jumps over the lazy dog", fontname: 'BigUpper', fontcolor: Font.CR_Green, alignment: JGP_HudMessage.ALIGN_CENTER, fadeinTime: 0, typeTime: 2, holdtime: 35, fadeOutTime: 50, scale: (0.5, 0.5), viewer: players[e.Player]);
 			if (hmsg)
 			{
 				hudmessages.Push(hmsg);
@@ -60,7 +60,7 @@ class JGP_HudMessageHandler : StaticEventHandler
 	}
 }
 
-class JGP_HudMessage : Thinker
+class JGP_HudMessage play
 {
 	PlayerInfo viewer;
 
