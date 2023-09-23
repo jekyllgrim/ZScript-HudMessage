@@ -46,6 +46,8 @@ Arguments:
 
 * `fadeOutTime` (default: 0) — the time **in tics** the message will take to fade out before disappearing.
 
+* `scale` (default: (1, 1)) — the scale of the text as a `vector2` value.
+
 * `viewer` (default: null) — a `PlayerPawn` pointer. If non-null, the message will only be visibled to the specified player. Otherwise it'll be visible to everyone.
 
 ## License
