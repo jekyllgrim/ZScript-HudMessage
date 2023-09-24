@@ -40,7 +40,7 @@ Arguments:
 
 * `fadeInTime` (default: 0) — the time **in tics** it takes the message to fade in. If non-zero, `holdTime` will begin the countdown after the message fully faded in.
 
-* `typeTime` (default: 0) — if non-zero, each character will take this amount of time **in tics** to type out each character in the string. If `fadeInTime` is non-zero, typing and fade-in will overlap, and `holdTime` will begin counting after whatever took longer (fade-in or type-out) has finished.
+* `typeTime` (default: 0) — if non-zero, each character in the string will take this amount of time **in tics** to apear to imitate typing. If `fadeInTime` is non-zero, typing and fade-in will overlap, and `holdTime` will begin counting after whatever took longer (fade-in or type-out) has finished.
 
 * `holdTime` (default: 35) — the time **in tics** the message will stay on the screen (fade-in, fade-out and type-out are added on top of this).
 
@@ -48,7 +48,7 @@ Arguments:
 
 * `scale` (default: (1, 1)) — the scale of the text as a `vector2` value.
 
-* `viewer` (default: null) — a `PlayerPawn` pointer. If non-null, the message will only be visibled to the specified player. Otherwise it'll be visible to everyone.
+* `viewer` (default: null) — a `PlayerInfo` pointer. If non-null, the message will only be visibled to the specified player. Otherwise it'll be visible to everyone.
 
 ## License
 
