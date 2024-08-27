@@ -7,7 +7,6 @@ class JGP_HudMessageHandler : StaticEventHandler
 
 	override void WorldTick()
 	{
-		//console.printf("No. of messages: %d", hudmessages.Size());
 		for (int i = 0; i < hudmessages.Size(); i++)
 		{
 			let hmsg = hudmessages[i];
@@ -22,16 +21,47 @@ class JGP_HudMessageHandler : StaticEventHandler
 		}
 	}
 
-	override void NetworkProcess(consoleEvent e)
+	override void InterfaceProcess(ConsoleEvent e)
 	{
+		// test code (type "interfaceevent testhudmsg" in console to test):
 		if (e.name == "testhudmsg")
 		{
-			//console.printf("testing ZSHudMessage");
-			let hmsg = JGP_HudMessage.Create("$GOTSHOTGUN", id: 1, fontname: 'BigUpper', fontcolor: Font.CR_Green, alignment: JGP_HudMessage.ALIGN_CENTER, fadeinTime: 0, typeTime: 2, holdtime: 35, fadeOutTime: 50, scale: (0.5, 0.5), viewer: players[e.Player]);
-			if (hmsg)
+			JGP_HudMessage.CreateUI("$GOTSHOTGUN", id: 1, fontname: 'BigUpper', fontcolor: Font.CR_Green, alignment: JGP_HudMessage.ALIGN_CENTER, fadeinTime: 0, typeTime: 2, holdtime: 35, fadeOutTime: 50, scale: (0.5, 0.5));
+		}
+	}
+
+	override void NetworkProcess(ConsoleEvent e)
+	{
+		// test code (type "netevent testhudmsg" in console to test):
+		if (e.name == "testhudmsg")
+		{
+			JGP_HudMessage.Create("$GOTSHOTGUN", id: 1, fontname: 'BigUpper', fontcolor: Font.CR_Green, alignment: JGP_HudMessage.ALIGN_CENTER, fadeinTime: 0, typeTime: 2, holdtime: 35, fadeOutTime: 50, scale: (0.5, 0.5), playerNumber: e.Player);
+		}
+
+		if (e.name.IndexOf("createzshudmessage") >= 0)
+		{
+			array <string> msg;
+			e.name.Split(msg,":");
+			if (msg.Size() == 14)
 			{
-				hudmessages.Push(hmsg);
-				//console.printf("Hudmessage pushed to array: %s", hmsg.GetText());
+				JGP_HudMessage.Create(
+					msg[1], //text
+					id: msg[2].ToInt(10),
+					fontname: msg[3], 
+					fontcolor: msg[4].ToInt(10), 
+					pos: (msg[5].ToDouble(), msg[6].ToDouble()), 
+					alignment: msg[7].ToInt(10), 
+					fadeInTime: msg[8].ToInt(10), 
+					typeTime: msg[9].ToInt(10), 
+					holdTime: msg[10].ToInt(10), 
+					fadeOutTime: msg[11].ToInt(10), 
+					scale: (msg[12].ToDouble(), msg[13].ToDouble()),
+					playerNumber: e.Player
+				);
+			}
+			else
+			{
+				console.printf("\cgHudMessage.CreateUI error. Expected \cd14\cg arguments, got \cd%d", msg.Size());
 			}
 		}
 	}
@@ -41,7 +71,7 @@ class JGP_HudMessageHandler : StaticEventHandler
 		for (int i = 0; i < hudmessages.Size(); i++)
 		{
 			let hmsg = hudmessages[i];
-			if (hmsg && (!hmsg.viewer || hmsg.viewer == players[consoleplayer]))
+			if (hmsg && (hmsg.playernumber < 0 || hmsg.playerNumber == consoleplayer))
 			{
 				//console.printf("Drawing message '%s' at %.1f, %.1f | alpha %.2f", text, pos.x, pos.y, alpha);
 				Screen.DrawText(
@@ -62,7 +92,7 @@ class JGP_HudMessageHandler : StaticEventHandler
 
 class JGP_HudMessage play
 {
-	PlayerInfo viewer;
+	int playerNumber;
 
 	protected uint id;
 	protected string fulltext;
@@ -102,28 +132,40 @@ class JGP_HudMessage play
 		return d;
 	}
 
-	static JGP_HudMessage Create(string text, uint id = 0, name fontname = 'NewSmallFont', int fontColor = Font.CR_Red, vector2 pos = (160, 50), int alignment = ALIGN_LEFT, uint fadeInTime = 0, uint typeTime = 0, uint holdTime = 35, uint fadeOutTime = 0, vector2 scale = (1,1), PlayerInfo viewer = null)
+	static ui void CreateUI(string text, uint id = 0, name fontname = 'NewSmallFont', int fontColor = Font.CR_Red, vector2 pos = (160, 50), int alignment = ALIGN_LEFT, uint fadeInTime = 0, uint typeTime = 0, uint holdTime = 35, uint fadeOutTime = 0, vector2 scale = (1,1))
+	{
+		EventHandler.SendNetworkEvent(
+			String.Format(
+				"createzshudmessage:%s:%d:%s:%d:%f:%f:%d:%d:%d:%d:%d:%f:%f",
+				text, id, fontname, fontcolor, pos.x, pos.y, alignment, fadeinTime, typeTime, holdTime, fadeOutTime, scale.x, scale.y
+			)
+		);
+	}
+
+	static JGP_HudMessage Create(string text, uint id = 0, name fontname = 'NewSmallFont', int fontColor = Font.CR_Red, vector2 pos = (160, 50), int alignment = ALIGN_LEFT, uint fadeInTime = 0, uint typeTime = 0, uint holdTime = 35, uint fadeOutTime = 0, vector2 scale = (1,1), int playerNumber = -1)
 	{
 		let hmsg = JGP_HudMessage(New("JGP_HudMessage"));
+		let handler = JGP_HudMessageHandler(StaticEventHandler.Find("JGP_HudMessageHandler"));
+		if (!handler)
+		{
+			ThrowAbortException("HUDMessage handler not found");
+			return null;
+		}
 		if (hmsg)
 		{
-			hmsg.viewer = viewer;
+			hmsg.playerNumber = Clamp(playerNumber, -1, MAXPLAYERS);
 			hmsg.scale = scale;
 			// id:
 			hmsg.id = id;
 			if (id > 0)
 			{
-				let handler = JGP_HudMessageHandler(StaticEventHandler.Find("JGP_HudMessageHandler"));
-				if (handler)
+				for (int i = 0; i < handler.hudmessages.Size(); i++)
 				{
-					for (int i = 0; i < handler.hudmessages.Size(); i++)
+					let othermsg = handler.hudmessages[i];
+					if (othermsg && othermsg.id == id)
 					{
-						let othermsg = handler.hudmessages[i];
-						if (othermsg && othermsg.id == id)
-						{
-							othermsg.Purge();
-							break;
-						}
+						othermsg.Purge();
+						break;
 					}
 				}
 			}
@@ -159,6 +201,7 @@ class JGP_HudMessage play
 			{
 				hmsg.alpha = 1;
 			}
+			handler.hudmessages.Push(hmsg);
 		}
 		return hmsg;
 	}
@@ -185,7 +228,7 @@ class JGP_HudMessage play
 			Destroy();
 			return;
 		}
-		//console.printf("Ticking hudmsg. Duration: %d | alpha: %f | text: %s | fulltext: %s", duration, alpha, text, fulltext);
+		
 		// tic down duration:
 		if (duration > 0)
 		{

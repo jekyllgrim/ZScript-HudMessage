@@ -12,13 +12,38 @@ This library requires three components to function:
 
 ## How to use
 
-To draw the hud message, call `JGP_HudMessage.Create` from anywhere in play context. Currently cannot be called in UI scope.
+To draw the hud message, call either `JGP_HudMessage.Create` to draw in play scope, or `JGP_HudMessage.CreateUI` to draw in UI-scope. 
 
 ```cs
-static JGP_HudMessage Create(string text, uint id = 0, name fontname = 'NewSmallFont', int fontColor = Font.CR_Red, vector2 pos = (160, 50), int alignment = ALIGN_LEFT, uint fadeInTime = 0, uint typeTime = 0, uint holdTime = 35, uint fadeOutTime = 0, vector2 scale = (1,1), PlayerInfo viewer = null)
+// play-scoped version:
+static JGP_HudMessage Create(string text, 
+    uint id = 0, 
+    name fontname = 'NewSmallFont', 
+    int fontColor = Font.CR_Red, 
+    vector2 pos = (160, 50), 
+    int alignment = ALIGN_LEFT, 
+    uint fadeInTime = 0, 
+    uint typeTime = 0, 
+    uint holdTime = 35, 
+    uint fadeOutTime = 0, 
+    vector2 scale = (1,1), 
+    int playerNumber = -1)
+
+// UI-scoped version:
+static ui void CreateUI(string text, 
+    uint id = 0, 
+    name fontname = 'NewSmallFont', 
+    int fontColor = Font.CR_Red, 
+    vector2 pos = (160, 50), 
+    int alignment = ALIGN_LEFT, 
+    uint fadeInTime = 0, 
+    uint typeTime = 0, 
+    uint holdTime = 35, 
+    uint fadeOutTime = 0, 
+    vector2 scale = (1,1))
 ```
 
-Arguments:
+Arguments for both functions:
 
 * `text` — the text to print. LANGUAGE references are supported.
 
@@ -48,7 +73,10 @@ Arguments:
 
 * `scale` (default: (1, 1)) — the scale of the text as a `vector2` value.
 
-* `viewer` (default: null) — a `PlayerInfo` pointer. If non-null, the message will only be visible to the specified player. Otherwise it'll be visible to everyone.
+* `playerNumber` (default: -1) — a player number. If a value higher than -1 is used, the message will only be visible to the specified player (0 is the 1st player, 1 is the 2nd player, etc.). If a negative value is used (default), the message will be visible to everyone.
+  `CreateUI` does not have the `playerNumber` argument. Messages created from UI scope are always drawn locally.
+
+The play-scoped version also returns a pointer to the created JGP_HudMessage class instance; the UI version doesn't.
 
 ## License
 
